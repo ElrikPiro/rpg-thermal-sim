@@ -1,9 +1,9 @@
 //============================================================================
 // Name        : rpg-thermal-sim.cpp
-// Author      : 
-// Version     :
-// Copyright   : Your copyright notice
-// Description : Hello World in C++, Ansi-style
+// Author      : David Baselga, <emperador.albino@gmail.com>
+// Version     : 0.0
+// Copyright   : Attribution only
+// Description : A simple RPG thermal simulator
 //============================================================================
 
 #include <iostream>
