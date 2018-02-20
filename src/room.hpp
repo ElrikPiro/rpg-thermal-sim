@@ -15,6 +15,11 @@
 #include <iostream>
 #include <sstream>
 
+class cell;
+bool comparePair(std::pair<int,cell*> first, std::pair<int,cell*> second){
+	return first.first < second.first;
+}
+
 class cell{
 	int flame;
 	int ignition;
@@ -71,7 +76,7 @@ class cell{
 
 	//Actions
 
-	void _spread(){
+	void __spread(){
 		int colder = 0;
 		for(auto it = this->neightbours.begin();it!=this->neightbours.end();it++){
 			cell* iterator = *it;
@@ -89,7 +94,7 @@ class cell{
 		}
 	}
 
-	void spread(){
+	void _spread(){
 		int colder = 0;
 		int accumulate = temp_counters;
 		int avg = 0;
@@ -115,15 +120,55 @@ class cell{
 		else giving = temp_counters/5;
 
 		while(giving>0){
-			stop.sort();
+			stop.sort(comparePair);
 			auto it = stop.begin();
 			std::pair<int,cell*> _it = *it;
 			cell* iterator = _it.second;
 			iterator->addCounters(1);
 			this->addCounters(-1);
 			giving--;
+			_it.first++;
 		}
 	}
+
+	void spread(){
+			int colder = 0;
+			int accumulate = temp_counters;
+			int avg = 0;
+			int giving = 0;
+			std::list<std::pair<int,cell*>> stop;
+			for(auto it = this->neightbours.begin();it!=this->neightbours.end();it++){
+				cell* iterator = *it;
+				accumulate += iterator->temp_counters;
+			}
+
+			avg = accumulate/(neightbours.size()+1);
+
+			for(auto it = this->neightbours.begin();it!=this->neightbours.end();it++){
+				cell* iterator = *it;
+				if(iterator->temp_counters < temp_counters) {
+					colder++;
+					stop.push_back(std::pair<int,cell*>(iterator->temp_counters,iterator));
+				}
+			}
+
+			if(colder<1) return;
+			giving = temp_counters-1;
+
+			while(giving>0){
+				stop.sort(comparePair);
+				auto it = stop.begin();
+				std::pair<int,cell*> _it = *it;
+				cell* iterator = _it.second;
+				stop.remove(_it);
+				if(_it.first>=giving) return;
+				iterator->addCounters(1);
+				this->addCounters(-1);
+				giving--;
+				_it.first+=1;
+				stop.push_front(std::pair<int,cell*>(_it.first,_it.second));
+			}
+		}
 
 	void commitStatus(){
 			if(aux_counters==0 && this->temp_counters>0) aux_counters--;
@@ -151,7 +196,7 @@ class cell{
 			if(this->temp_counters <= 0) break;
 			if(iterator->temp_counters == 0) {
 				++count;
-				if(count>=3){
+				if(count>=neightbours.size()/2){
 					this->temp_counters--;
 					break;
 				}
