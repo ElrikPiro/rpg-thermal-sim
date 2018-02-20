@@ -94,6 +94,7 @@ class cell{
 		int accumulate = temp_counters;
 		int avg = 0;
 		int giving = 0;
+		std::list<std::pair<int,cell*>> stop;
 		for(auto it = this->neightbours.begin();it!=this->neightbours.end();it++){
 			cell* iterator = *it;
 			accumulate += iterator->temp_counters;
@@ -103,25 +104,24 @@ class cell{
 
 		for(auto it = this->neightbours.begin();it!=this->neightbours.end();it++){
 			cell* iterator = *it;
-			if(iterator->temp_counters < avg || iterator->temp_counters < temp_counters) colder++;
+			if(iterator->temp_counters < avg && iterator->temp_counters < temp_counters) {
+				colder++;
+				stop.push_back(std::pair<int,cell*>(iterator->temp_counters,iterator));
+			}
 		}
 
 		if(colder<1) return;
-		if(avg<=this->temp_counters) giving = (temp_counters-avg)/colder;
-		else giving = temp_counters/(colder*2);
+		if(avg<=this->temp_counters) giving = temp_counters-avg;
+		else giving = temp_counters/5;
 
-		for(auto it = this->neightbours.begin();it!=this->neightbours.end();it++){
-			cell* iterator = *it;
-			if(iterator->temp_counters < avg || iterator->temp_counters < temp_counters){
-				int howmuch = avg - iterator->temp_counters;
-				if(howmuch<giving) {
-					iterator->addCounters(howmuch);
-					this->addCounters(-howmuch);
-				}else{
-					iterator->addCounters(giving);
-					this->addCounters(-giving);
-				}
-			}
+		while(giving>0){
+			stop.sort();
+			auto it = stop.begin();
+			std::pair<int,cell*> _it = *it;
+			cell* iterator = _it.second;
+			iterator->addCounters(1);
+			this->addCounters(-1);
+			giving--;
 		}
 	}
 
