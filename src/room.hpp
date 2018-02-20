@@ -107,6 +107,7 @@ class cell{
 	}
 
 	void dissipateHeat(){
+		if(!this->flame) this->temp_counters -= this->temp_counters/10;
 		for(auto it = this->neightbours.begin();it!=this->neightbours.end();it++){
 			cell* iterator = *it;
 			if(this->temp_counters == 0) break;
@@ -207,8 +208,6 @@ class room{
 
 	void iterate(int n=1){
 		while(n--){
-			for(int i = 0;i<w*h;i++) layout[i]->spread();
-			for(int i = 0;i<w*h;i++) layout[i]->commitStatus();
 			for(int i = 0;i<w*h;i++) layout[i]->spread();
 			for(int i = 0;i<w*h;i++) layout[i]->commitStatus();
 
