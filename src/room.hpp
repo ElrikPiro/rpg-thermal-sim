@@ -71,7 +71,7 @@ class cell{
 
 	//Actions
 
-	void spread(){
+	void _spread(){
 		int colder = 0;
 		for(auto it = this->neightbours.begin();it!=this->neightbours.end();it++){
 			cell* iterator = *it;
@@ -82,14 +82,51 @@ class cell{
 		else if(colder==1) this->aux_counters -= this->temp_counters;
 		else this->aux_counters -= (this->temp_counters-this->temp_counters%colder);
 
-		int giving = this->temp_counters/colder;
+		int giving = this->temp_counters/16;
 		for(auto it = this->neightbours.begin();it!=this->neightbours.end();it++){
 			cell* iterator = *it;
 			if(iterator->temp_counters < this->temp_counters) iterator->addCounters(giving);
 		}
 	}
 
+	void spread(){
+		int colder = 0;
+		int accumulate = temp_counters;
+		int avg = 0;
+		int giving = 0;
+		for(auto it = this->neightbours.begin();it!=this->neightbours.end();it++){
+			cell* iterator = *it;
+			accumulate += iterator->temp_counters;
+		}
+
+		avg = accumulate/(neightbours.size()+1);
+
+		for(auto it = this->neightbours.begin();it!=this->neightbours.end();it++){
+			cell* iterator = *it;
+			if(iterator->temp_counters < avg || iterator->temp_counters < temp_counters) colder++;
+		}
+
+		if(colder<1) return;
+		if(avg<=this->temp_counters) giving = (temp_counters-avg)/colder;
+		else giving = temp_counters/(colder*2);
+
+		for(auto it = this->neightbours.begin();it!=this->neightbours.end();it++){
+			cell* iterator = *it;
+			if(iterator->temp_counters < avg || iterator->temp_counters < temp_counters){
+				int howmuch = avg - iterator->temp_counters;
+				if(howmuch<giving) {
+					iterator->addCounters(howmuch);
+					this->addCounters(-howmuch);
+				}else{
+					iterator->addCounters(giving);
+					this->addCounters(-giving);
+				}
+			}
+		}
+	}
+
 	void commitStatus(){
+			if(aux_counters==0 && this->temp_counters>0) aux_counters--;
 			this->temp_counters += aux_counters;
 			this->aux_counters = 0;
 	}
@@ -107,13 +144,17 @@ class cell{
 	}
 
 	void dissipateHeat(){
-		if(!this->flame) this->temp_counters -= this->temp_counters/10;
+		int count = 0;
+		if(!this->flame && this->temp_counters>=10) this->temp_counters -= this->temp_counters/10;
 		for(auto it = this->neightbours.begin();it!=this->neightbours.end();it++){
 			cell* iterator = *it;
-			if(this->temp_counters == 0) break;
+			if(this->temp_counters <= 0) break;
 			if(iterator->temp_counters == 0) {
-				this->temp_counters--;
-				break;
+				++count;
+				if(count>=3){
+					this->temp_counters--;
+					break;
+				}
 			}
 		}
 	}
