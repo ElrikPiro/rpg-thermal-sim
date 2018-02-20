@@ -241,7 +241,18 @@ class cell{
 		return oss.str();
 	}
 
-	//TODO:forgetMe(), setUnreachable()
+	//forgetMe(), setUnreachable()
+	void forgetMe(){
+		for(auto it = this->neightbours.begin();it!=this->neightbours.end();it++){
+			cell* iterator = *it;
+			iterator->neightbours.remove(this);
+		}
+	}
+
+	void setUnreachable(){
+		forgetMe();
+		this->spreadable = 0;
+	}
 
 };
 
