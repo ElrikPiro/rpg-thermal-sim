@@ -12,6 +12,8 @@
 #include <map>
 #include <string>
 #include <cstdlib>
+#include <iostream>
+#include <sstream>
 
 class cell{
 	int flame;
@@ -73,7 +75,7 @@ class cell{
 		int colder = 0;
 		for(auto it = this->neightbours.begin();it!=this->neightbours.end();it++){
 			cell* iterator = *it;
-			if(iterator->spreadable && (iterator->temp_counters < this->temp_counters)) colder++;//FIXME: Segmentation fault
+			if(iterator->spreadable && (iterator->temp_counters < this->temp_counters)) colder++;
 		}
 
 		if(colder==0) return;
@@ -115,6 +117,45 @@ class cell{
 		}
 	}
 
+	//linkRooms(cell*,cell*) to add temperature transfer between rooms
+	void linkRooms(cell* destination){
+		this->addNeightbour(destination);
+		destination->addNeightbour(this);
+	}
+
+	std::string toString(){
+		char RESET[] = {0x1b,'[','3','9',';','4','9','m'};
+		char FIRE[] = {0x1b,'[','4','1','m'};
+		char HEAT[] = {0x1b,'[','1','0','0','m'};
+		char INFLAMMABLE[] = {0x1b,'[','4','4','m'};
+
+		std::ostringstream oss;
+		oss << '[';
+		if(this->flame==1)
+			oss << FIRE << " * ";
+		else if(!this->spreadable)
+			oss << "###";
+		else if(this->temp_counters>0){//until 1000 it works properly, I assume we'll never reach ten hundred degrees.
+			oss << HEAT;
+			if(this->temp_counters < 10) oss << " " << this->temp_counters << " ";
+			else if(this->temp_counters < 100) oss << " " << this->temp_counters;
+			else oss << this->temp_counters;
+		}else if(this->ignition>0){
+			oss << INFLAMMABLE;
+			if(this->ignition < 10) oss << " " << this->ignition << " ";
+			else if(this->ignition < 100) oss << " " << this->ignition;
+			else oss << this->ignition;
+		}else{
+			oss << "   ";
+		}
+
+
+		oss<<RESET<<']';
+		return oss.str();
+	}
+
+	//TODO:forgetMe(), setUnreachable()
+
 };
 
 class room{
@@ -152,6 +193,7 @@ class room{
 	room(int w, int h, std::string rn = "Generic room"){
 		this->w = w;
 		this->h = h;
+		this->desc = rn;
 
 		for(int i = 0;i<w*h;i++) {
 			cell* cellofgrid = new cell("0,0,0,1");
@@ -177,11 +219,26 @@ class room{
 	}
 
 
-	//TODO: getCellXY(int,int) to get and edit cell properties
-	//TODO: toString() to show counters and maybe colors
+	//getCellXY(int,int) to get and edit cell properties
+	cell* getCellXY(int x,int y){
+		return layout[w*y+x];
+	}
+
+	//toString() to show counters and maybe colors
+	std::string toString(){
+		std::ostringstream oss;
+		oss << this->desc << std::endl;
+		for(int ih = 0;ih<this->h;ih++){
+			for(int jw = 0;jw<this->w;jw++){
+				oss << this->layout[ih*this->w+jw]->toString();
+			}
+			oss << std::endl;
+		}
+		return oss.str();
+	}
 
 };
 
-//TODO: linkRooms(cell*,cell*) to add temperature transfer between rooms
+
 
 #endif /* ROOM_HPP_ */
