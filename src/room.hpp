@@ -9,20 +9,22 @@
 #define ROOM_HPP_
 
 #include <list>
+#include <map>
 #include <string>
 #include <cstdlib>
 
 class cell{
-	int flame = 0;
-	int ignition = 0;
-	int temp_counters = 0;
-	int spreadable = 0; //boolean
+	int flame;
+	int ignition;
+	int temp_counters;
+	int spreadable; //boolean
 
 	int aux_counters = 0;
 
 	std::list<cell*> neightbours;
 
 	public:
+	//TODO: GETTERS AND SETTERS
 	cell(std::string args){//format: (...;)flame,ignition,temp_counters,spreadable(;...)
 		std::string aux = args;
 		flame = std::atoi(aux.substr(0,aux.find(",")).c_str());
@@ -32,6 +34,19 @@ class cell{
 		temp_counters = std::atoi(aux.substr(0,aux.find(",")).c_str());
 		aux = aux.substr(aux.find(",")+1);
 		spreadable = std::atoi(aux.c_str());
+		aux_counters = 0;
+	}
+
+	cell(char arg){
+		if(arg=='.'){
+			cell("0,0,0,1");
+		}else if(arg=='#'){
+			cell("0,0,0,0");
+		}else if(arg=='*'){
+			cell("1,-20,0,1");
+		}else{
+			cell("0,0,0,1");
+		}
 	}
 
 	void setStatus(int f,int i, int t){
@@ -49,17 +64,16 @@ class cell{
 	}
 
 	void addNeightbour(cell* newcomer){
-		if(newcomer->isSpreadable()) this->neightbours.push_back(newcomer);
-		this->neightbours.unique();
+		if(newcomer->isSpreadable() && newcomer != this) this->neightbours.push_back(newcomer);
 	}
 
 	//Actions
 
 	void spread(){
 		int colder = 0;
-		for(auto it = this->neightbours.begin();it==this->neightbours.end();it++){
+		for(auto it = this->neightbours.begin();it!=this->neightbours.end();it++){
 			cell* iterator = *it;
-			if(iterator->spreadable && (iterator->temp_counters < this->temp_counters)) colder++;
+			if(iterator->spreadable && (iterator->temp_counters < this->temp_counters)) colder++;//FIXME: Segmentation fault
 		}
 
 		if(colder==0) return;
@@ -67,7 +81,7 @@ class cell{
 		else this->aux_counters -= (this->temp_counters-this->temp_counters%colder);
 
 		int giving = this->temp_counters/colder;
-		for(auto it = this->neightbours.begin();it==this->neightbours.end();it++){
+		for(auto it = this->neightbours.begin();it!=this->neightbours.end();it++){
 			cell* iterator = *it;
 			if(iterator->temp_counters < this->temp_counters) iterator->addCounters(giving);
 		}
@@ -91,8 +105,9 @@ class cell{
 	}
 
 	void dissipateHeat(){
-		for(auto it = this->neightbours.begin();it==this->neightbours.end();it++){
+		for(auto it = this->neightbours.begin();it!=this->neightbours.end();it++){
 			cell* iterator = *it;
+			if(this->temp_counters == 0) break;
 			if(iterator->temp_counters == 0) {
 				this->temp_counters--;
 				break;
@@ -103,11 +118,70 @@ class cell{
 };
 
 class room{
-	cell*** layout;
+	std::map<int,cell*> layout;
+	int w,h;
+	std::string desc;
+
+	void setNeigthbours(){
+		for(int i = 0;i<w*h;i++){
+					int jw = (i%w);
+					int jh = (i/w);
+
+					jh--;jw--;//upper line
+					if((jw)>=0 && (jw<w) && jh>=0 && jh<h) layout[i]->addNeightbour(layout[jw+jh*w]);
+					jw++;
+					if((jw)>=0 && (jw<w) && jh>=0 && jh<h) layout[i]->addNeightbour(layout[jw+jh*w]);
+					jw++;
+					if((jw)>=0 && (jw<w) && jh>=0 && jh<h) layout[i]->addNeightbour(layout[jw+jh*w]);
+
+					jh++;//middle line
+					if((jw)>=0 && (jw<w) && jh>=0 && jh<h) layout[i]->addNeightbour(layout[jw+jh*w]);
+					jw-=2;
+					if((jw)>=0 && (jw<w) && jh>=0 && jh<h) layout[i]->addNeightbour(layout[jw+jh*w]);
+
+					jh++;//lower line
+					if((jw)>=0 && (jw<w) && jh>=0 && jh<h) layout[i]->addNeightbour(layout[jw+jh*w]);
+					jw++;
+					if((jw)>=0 && (jw<w) && jh>=0 && jh<h) layout[i]->addNeightbour(layout[jw+jh*w]);
+					jw++;
+					if((jw)>=0 && (jw<w) && jh>=0 && jh<h) layout[i]->addNeightbour(layout[jw+jh*w]);
+				}
+	}
 
 	public:
+	room(int w, int h, std::string rn = "Generic room"){
+		this->w = w;
+		this->h = h;
+
+		for(int i = 0;i<w*h;i++) {
+			cell* cellofgrid = new cell("0,0,0,1");
+			layout.insert(std::pair<int,cell*>(i,cellofgrid));
+		}
+
+		//set neighbours
+		setNeigthbours();
+
+	}
+
+	void iterate(int n=1){
+		while(n--){
+			for(int i = 0;i<w*h;i++) layout[i]->spread();
+			for(int i = 0;i<w*h;i++) layout[i]->commitStatus();
+			for(int i = 0;i<w*h;i++) layout[i]->spread();
+			for(int i = 0;i<w*h;i++) layout[i]->commitStatus();
+
+			for(int i = 0;i<w*h;i++) layout[i]->checkFlashpoint();
+
+			for(int i = 0;i<w*h;i++) layout[i]->dissipateHeat();
+		}
+	}
+
+
+	//TODO: getCellXY(int,int) to get and edit cell properties
+	//TODO: toString() to show counters and maybe colors
+
 };
 
-
+//TODO: linkRooms(cell*,cell*) to add temperature transfer between rooms
 
 #endif /* ROOM_HPP_ */
