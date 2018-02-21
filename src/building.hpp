@@ -13,6 +13,7 @@
 #include <string>
 #include <cstdlib>
 #include <iostream>
+#include <istream>
 #include <sstream>
 #include "room.hpp"
 
@@ -41,7 +42,7 @@ class building{
 	//TODO: commands //FIXME: input problems must be prevented
 	void refresh(layout buildingLayout){
 		std::cout << CLEAR;
-		std::cout << "Iteration: " << ++this->iteration << "\n";
+		std::cout << "Iteration: " << this->iteration << "\n";
 		for(auto it = buildingLayout.begin();it!=buildingLayout.end();it++){
 			std::pair<std::string, room*> iterator = *it;
 			std::cout << "CODE: <" << iterator.first << ">" << std::endl << iterator.second->toString();
@@ -50,6 +51,7 @@ class building{
 
 	void iterate(int n=1){
 		for(int i = 0;i<n;i++){
+			this->iteration++;
 			for(auto it = buildingLayout.begin();it!=buildingLayout.end();it++){
 				std::pair<std::string, room*> iterator = *it;
 				iterator.second->iterate(1);
@@ -105,7 +107,7 @@ class building{
 	//deflagrate(int): ignites a cell and its neightbours on n levels
 	void deflagrate(std::string ID,int x,int y,int r = 1){
 		cell* c = buildingLayout[ID]->getCellXY(x,y);
-
+		_deflagrate(c,r);
 	}
 
 	void _deflagrate(cell* c,int r=1){//FIXME: crap like this should be moved to the cell class
@@ -119,7 +121,7 @@ class building{
 	//help: list all commands
 	void help(){//TODO: make it prettier
 		std::cout <<
-				"refresh [roomID [roomID [(...)}]] - cleans the screen and shows all the rooms on buildings"
+				"refresh [roomID [roomID [(...)}]] - cleans the screen and shows all the rooms on buildings "
 				"if a list of room IDs is provided, it will only show those rooms.\n"
 				"\n"
 				"iterate [n] - calculates the next n iterations, n defaults to 1\n"
@@ -144,20 +146,41 @@ class building{
 	}
 
 
-	bool command(){
+	int command(){
 		std::string input, command, args;
-		help();
 		std::cout << "command> ";
-		std::cin >> input;
+		std::getline(std::cin,input);
 		command = input.substr(0,input.find(" "));
 		args = input.substr(input.find(" ")+1);
 
 		//TODO: the whole parsing
-		return false;
+		if(command=="refresh"){
+			layout ref;
+			if(args.find(" ")==args.npos && args==command) {
+				refresh(this->buildingLayout);
+				return 0;
+			}
+			do{
+				std::string aux = args.substr(0,args.find(" "));
+				args = args.substr(args.find(" ")+1);
+				if( this->buildingLayout.find(args) == this->buildingLayout.end() ) return 2;
+				ref[args] = this->buildingLayout[args];
+			}while(args.find(" ")!=args.npos);
+			refresh(ref);
+			return 0;
+		}
+
+		return 1;
 	}
 
 	void loop(){
-		while(command());
+		int h = 0;
+		while(h!=-1){
+			h=command();
+			if(h==1) help();
+			else if(h>1) std::cerr << "Error code: " << h << std::endl;
+			if(h==2) std::cerr << "wrong input" << std::endl;
+		}
 	}
 
 };
