@@ -61,6 +61,14 @@ class cell{
 		this->temp_counters = t;
 	}
 
+	int getIgnition(){
+		return this->ignition;
+	}
+
+	int getTemp(){
+		return this->temp_counters;
+	}
+
 	void addCounters(int add){
 		this->aux_counters += add;
 	}
@@ -70,7 +78,7 @@ class cell{
 	}
 
 	void addNeightbour(cell* newcomer){
-		if(newcomer->isSpreadable() && newcomer != this) this->neightbours.push_back(newcomer);
+		if(newcomer != this) this->neightbours.push_back(newcomer);
 	}
 
 	//Actions
@@ -78,19 +86,19 @@ class cell{
 	void spread(){
 			int colder = 0;
 			int accumulate = temp_counters;
-			int avg = 0;
+			//int avg = 0;
 			int giving = 0;
 			std::list<std::pair<int,cell*>> stop;
 			for(auto it = this->neightbours.begin();it!=this->neightbours.end();it++){
 				cell* iterator = *it;
-				accumulate += iterator->temp_counters;
+				if(iterator->isSpreadable()) accumulate += iterator->temp_counters;
 			}
 
-			avg = accumulate/(neightbours.size()+1);
+			//avg = accumulate/(neightbours.size()+1);
 
 			for(auto it = this->neightbours.begin();it!=this->neightbours.end();it++){
 				cell* iterator = *it;
-				if(iterator->temp_counters < temp_counters) {
+				if(iterator->isSpreadable() && iterator->temp_counters < temp_counters ) {
 					colder++;
 					stop.push_back(std::pair<int,cell*>(iterator->temp_counters,iterator));
 				}
@@ -133,14 +141,19 @@ class cell{
 	}
 
 	void dissipateHeat(){
+		int flanders = 0;
+		for(auto it = this->neightbours.begin();it!=this->neightbours.end();it++){
+			cell* iterator = *it;
+			if(iterator->isSpreadable()) flanders++;
+		}
 		int count = 0;
 		if(!this->flame && this->temp_counters>=10) this->temp_counters -= this->temp_counters/10;
 		for(auto it = this->neightbours.begin();it!=this->neightbours.end();it++){
 			cell* iterator = *it;
 			if(this->temp_counters <= 0) break;
-			if(iterator->temp_counters == 0) {
+			if(iterator->isSpreadable() && iterator->temp_counters == 0) {
 				++count;
-				if(count>=neightbours.size()/2){
+				if(count>=flanders/2){
 					this->temp_counters--;
 					break;
 				}
@@ -194,8 +207,16 @@ class cell{
 	}
 
 	void setUnreachable(){
-		forgetMe();
+		//forgetMe();
 		this->spreadable = 0;
+	}
+
+	int getFlame(){
+		return this->flame;
+	}
+
+	std::list<cell*> getNeightbourhood(){
+		return neightbours;
 	}
 
 };
@@ -263,6 +284,12 @@ class room{
 	cell* getCellXY(int x,int y){
 		return layout[w*y+x];
 	}
+
+	std::string getDesc(){
+		return this->desc;
+	}
+
+
 
 	//toString() to show counters and maybe colors
 	std::string toString(){
