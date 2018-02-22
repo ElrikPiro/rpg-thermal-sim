@@ -160,13 +160,22 @@ class building{
 				refresh(this->buildingLayout);
 				return 0;
 			}
-			do{
-				std::string aux = args.substr(0,args.find(" "));
-				args = args.substr(args.find(" ")+1);
-				if( this->buildingLayout.find(args) == this->buildingLayout.end() ) return 2;
-				ref[args] = this->buildingLayout[args];
-			}while(args.find(" ")!=args.npos);
+			std::string aux;
+			for(aux.clear();args.size()!=0;args=args.substr(1)){
+				if(args.front()==' '){
+					if( this->buildingLayout.find(aux) == this->buildingLayout.end() ) return 2;
+					ref[aux] = this->buildingLayout[aux];
+					aux.clear();
+				}else{
+					aux.push_back(args.front());
+				}
+			}
+
+			if( this->buildingLayout.find(aux) == this->buildingLayout.end() ) return 2;
+			ref[aux] = this->buildingLayout[aux];
+
 			refresh(ref);
+
 			return 0;
 		}
 
