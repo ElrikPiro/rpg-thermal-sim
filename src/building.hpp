@@ -147,35 +147,54 @@ class building{
 
 
 	int command(){
-		std::string input, command, args;
+		std::string input, command;
 		std::cout << "command> ";
 		std::getline(std::cin,input);
-		command = input.substr(0,input.find(" "));
-		args = input.substr(input.find(" ")+1);
+		std::istringstream args(input);
+		std::getline(args,command,' ');
+
 
 		//TODO: the whole parsing
 		if(command=="refresh"){
 			layout ref;
-			if(args.find(" ")==args.npos && args==command) {
-				refresh(this->buildingLayout);
-				return 0;
-			}
-			std::string aux;
-			for(aux.clear();args.size()!=0;args=args.substr(1)){
-				if(args.front()==' '){
-					if( this->buildingLayout.find(aux) == this->buildingLayout.end() ) return 2;
-					ref[aux] = this->buildingLayout[aux];
-					aux.clear();
-				}else{
-					aux.push_back(args.front());
-				}
+
+			while(std::getline(args,command,' ')){
+				if( this->buildingLayout.find(command) == this->buildingLayout.end() ) return 2;
+				ref[command] = this->buildingLayout[command];
 			}
 
-			if( this->buildingLayout.find(aux) == this->buildingLayout.end() ) return 2;
-			ref[aux] = this->buildingLayout[aux];
-
+			if(ref.empty()) ref = this->buildingLayout;
 			refresh(ref);
 
+			return 0;
+		}else if(command=="iterate"){
+			bool a = (bool) std::getline(args,command,' ');
+			if(a&&std::atoi(command.c_str())>1) iterate(std::atoi(command.c_str()));
+			else iterate();
+			return 0;
+		}else if(command=="build"){//void newRoom(std::string ID,int w,int h,std::string desc)
+			std::string ID,desc;
+			int w,h;
+			if(std::getline(args,command,' ')){
+				ID = command;
+				if( this->buildingLayout.find(command) != this->buildingLayout.end() ) return 3;
+			}else return 1;
+
+			if(std::getline(args,command,' ')){
+				w = std::atoi(command.c_str());
+				if( w<1 ) return 2;
+			}else return 1;
+
+			if(std::getline(args,command,' ')){
+				h = std::atoi(command.c_str());
+				if( h<1 ) return 2;
+			}else return 1;
+
+			if(std::getline(args,desc)){
+
+			}else desc = "Room without description";
+
+			newRoom(ID,w,h,desc);
 			return 0;
 		}
 
@@ -189,6 +208,7 @@ class building{
 			if(h==1) help();
 			else if(h>1) std::cerr << "Error code: " << h << std::endl;
 			if(h==2) std::cerr << "wrong input" << std::endl;
+			if(h==3) std::cerr << "object already exist" << std::endl;
 		}
 	}
 
