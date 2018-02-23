@@ -23,6 +23,7 @@ typedef std::map<std::string, room*> layout;
 
 class building{
 	std::map<std::string, room*> buildingLayout;
+	layout ref;
 	std::list<std::string> links;
 	int iteration = 0;
 
@@ -33,6 +34,7 @@ class building{
 
 	building(std::map<std::string, room*> rooms){
 		buildingLayout = rooms;
+		ref = rooms;
 	}
 
 	building(std::string file){
@@ -64,9 +66,8 @@ class building{
 		buildingLayout[ID] = r;
 	}
 
-	void setCell(std::string ID,int x,int y,int flame=0,int ignition=0, int temp=0, bool air = true ){
+	void setCell(std::string ID,int x,int y,int flame=0,int ignition=0, int temp=0){
 		buildingLayout[ID]->getCellXY(x,y)->setStatus(flame,ignition,temp);
-		buildingLayout[ID]->getCellXY(x,y)->setUnreachable();
 	}
 
 	void linkCells(std::string ID1,int x1,int y1,std::string ID2,int x2, int y2){
@@ -128,7 +129,7 @@ class building{
 				"\n"
 				"build roomID w h [description] - builds a new empty room\n"
 				"\n"
-				"set roomID x y [flame [ignition [temperature [spreadable]]]] - sets a new status to the selected"
+				"set roomID x y flame ignition temperature - sets a new status to the selected"
 				"cell \n"
 				"\n"
 				"link roomID x y roomID x y - link two cells, intended to connect cells between rooms\n"
@@ -142,6 +143,10 @@ class building{
 				"deflagrate roomID x y [r] - set a cell and it's neightbours on fire, "
 				"if r is set higher than 1, it will do it recursively r times\n"
 				"\n"
+				"block roomID x y - makes a cell unspreadable\n"
+				"\n"
+				"unblock roomID x y - makes a cell spreadable\n"
+				"\n"
 				"Note that blank spaces will act as a separator.\n"<<std::endl;
 	}
 
@@ -153,10 +158,12 @@ class building{
 		std::istringstream args(input);
 		std::getline(args,command,' ');
 
+		if(command==""){iterate();refresh(ref);return 0;}
 
 		//TODO: the whole parsing
 		if(command=="refresh"){
-			layout ref;
+
+			ref.clear();
 
 			while(std::getline(args,command,' ')){
 				if( this->buildingLayout.find(command) == this->buildingLayout.end() ) return 2;
@@ -171,6 +178,7 @@ class building{
 			bool a = (bool) std::getline(args,command,' ');
 			if(a&&std::atoi(command.c_str())>1) iterate(std::atoi(command.c_str()));
 			else iterate();
+			refresh(ref);
 			return 0;
 		}else if(command=="build"){//void newRoom(std::string ID,int w,int h,std::string desc)
 			std::string ID,desc;
@@ -182,7 +190,7 @@ class building{
 
 			if(std::getline(args,command,' ')){
 				w = std::atoi(command.c_str());
-				if( w<1 ) return 2;
+				if( w<1 ) return 2;//FIXME: ojo! those input must be checked in order ti avoid referencing outbounds
 			}else return 1;
 
 			if(std::getline(args,command,' ')){
@@ -196,6 +204,80 @@ class building{
 
 			newRoom(ID,w,h,desc);
 			return 0;
+		}else if(command=="set"){
+			std::string ID;
+			int w,h;
+			int flame=0,ignition=0,temperature=0;
+
+			if(std::getline(args,command,' ')){
+				ID = command;
+				if( this->buildingLayout.find(command) == this->buildingLayout.end() ) return 4;
+			}else return 1;
+
+			if(std::getline(args,command,' ')){
+				w = std::atoi(command.c_str())-1;
+				if( w<0 ) return 2;
+			}else return 1;
+
+			if(std::getline(args,command,' ')){
+				h = std::atoi(command.c_str())-1;
+				if( h<0 ) return 2;
+			}else return 1;
+
+			if(std::getline(args,command,' ')){
+				flame = std::atoi(command.c_str());
+				if( flame<0 || flame>1 ) return 2;
+			}
+
+			if(std::getline(args,command,' ')){
+				ignition = std::atoi(command.c_str());
+				if( flame > 0 && ignition > 0 ) return 2;
+			}
+
+			if(std::getline(args,command,' ')){
+				temperature = std::atoi(command.c_str());
+				if( temperature < 0 ) return 2;
+			}
+
+			setCell(ID,w,h,flame,ignition,temperature);
+			return 0;
+		}else if(command=="exit") return -1;
+		else if(command=="link"){
+			std::string ID1,ID2;
+			int w1,h1,w2,h2;
+
+			if(std::getline(args,command,' ')){
+				ID1 = command;
+				if( this->buildingLayout.find(command) == this->buildingLayout.end() ) return 3;
+			}else return 1;
+
+			if(std::getline(args,command,' ')){
+				w1 = std::atoi(command.c_str())-1;
+				if( w1<0 ) return 2;
+			}else return 1;
+
+			if(std::getline(args,command,' ')){
+				h1 = std::atoi(command.c_str())-1;
+				if( h1<0 ) return 2;
+			}else return 1;
+
+			if(std::getline(args,command,' ')){
+				ID2 = command;
+				if( this->buildingLayout.find(command) == this->buildingLayout.end() ) return 3;
+			}else return 1;
+
+			if(std::getline(args,command,' ')){
+				w2 = std::atoi(command.c_str())-1;
+				if( w2<0 ) return 2;
+			}else return 1;
+
+			if(std::getline(args,command,' ')){
+				h2 = std::atoi(command.c_str())-1;
+				if( h2<0 ) return 2;
+			}else return 1;
+
+			linkCells(ID1,w1,h1,ID2,w2,h2);
+			return 0;
 		}
 
 		return 1;
@@ -205,10 +287,12 @@ class building{
 		int h = 0;
 		while(h!=-1){
 			h=command();
+			if(h==0) refresh(ref);
 			if(h==1) help();
 			else if(h>1) std::cerr << "Error code: " << h << std::endl;
 			if(h==2) std::cerr << "wrong input" << std::endl;
 			if(h==3) std::cerr << "object already exist" << std::endl;
+			if(h==4) std::cerr << "room does not exist" << std::endl;
 		}
 	}
 
