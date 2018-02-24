@@ -180,6 +180,8 @@ class building{
 				"\n"
 				"unblock roomID x y - makes a cell spreadable\n"
 				"\n"
+				"put roomID x y ignition - puts an inflamable object on the selected cell\n"
+				""
 				"Note that blank spaces will act as a separator.\n"<<std::endl;
 	}
 
@@ -410,6 +412,32 @@ class building{
 			}else return 1;
 
 			unblock(ID1,x,y);
+			return 0;
+		}else if(command=="put"){
+			std::string ID1;
+			int x,y,ignition;
+
+			if(std::getline(args,command,' ')){
+				ID1 = command;
+				if( this->buildingLayout.find(command) == this->buildingLayout.end() ) return 3;
+			}else return 1;
+
+			if(std::getline(args,command,' ')){
+				x = std::atoi(command.c_str())-1;
+				if( x<0 ) return 2;
+			}else return 1;
+
+			if(std::getline(args,command,' ')){
+				y = std::atoi(command.c_str())-1;
+				if( y<0 ) return 2;
+			}else return 1;
+
+			if(std::getline(args,command,' ')){
+				ignition = std::atoi(command.c_str());
+				if( ignition<0 ) return 2;
+			}else return 1;
+
+			setCell(ID1,x,y,0,ignition,0);
 			return 0;
 		}
 
