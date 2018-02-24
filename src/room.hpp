@@ -207,8 +207,11 @@ class cell{
 	}
 
 	void setUnreachable(){
-		//forgetMe();
 		this->spreadable = 0;
+	}
+
+	void setReachable(){
+		this->spreadable = 1;
 	}
 
 	int getFlame(){

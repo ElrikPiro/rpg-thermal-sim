@@ -108,6 +108,7 @@ class building{
 	//deflagrate(int): ignites a cell and its neightbours on n levels
 	void deflagrate(std::string ID,int x,int y,int r = 1){
 		cell* c = buildingLayout[ID]->getCellXY(x,y);
+		_ignite(c);
 		_deflagrate(c,r);
 	}
 
@@ -116,8 +117,18 @@ class building{
 		for(auto it = nhood.begin();it!=nhood.end();it++){
 			cell* iterator = *it;
 			if(iterator->isSpreadable()) _ignite(iterator);
-			if(iterator->isSpreadable() && r>1) _deflagrate(c,r-1);
+			if(iterator->isSpreadable() && r>1) _deflagrate(iterator,r-1);
 		}
+	}
+
+	void block(std::string ID,int x,int y){
+		cell* c = buildingLayout[ID]->getCellXY(x,y);
+		c->setUnreachable();
+	}
+
+	void unblock(std::string ID,int x,int y){
+			cell* c = buildingLayout[ID]->getCellXY(x,y);
+			c->setReachable();
 	}
 	//help: list all commands
 	void help(){//TODO: make it prettier
@@ -133,8 +144,6 @@ class building{
 				"cell \n"
 				"\n"
 				"link roomID x y roomID x y - link two cells, intended to connect cells between rooms\n"
-				"\n"
-				"check roomID - shows the status of a room\n"
 				"\n"
 				"list - shows all room names and descriptions\n"
 				"\n"
@@ -203,6 +212,7 @@ class building{
 			}else desc = "Room without description";
 
 			newRoom(ID,w,h,desc);
+			ref[ID] = this->buildingLayout[ID];
 			return 0;
 		}else if(command=="set"){
 			std::string ID;
@@ -277,6 +287,99 @@ class building{
 			}else return 1;
 
 			linkCells(ID1,w1,h1,ID2,w2,h2);
+			return 0;
+		}else if(command=="list"){
+			for(auto it = this->buildingLayout.begin();it!=this->buildingLayout.end();it++){
+				listRooms();
+				return -2;
+			}
+		}else if(command=="ignite"){
+			std::string ID1;
+			int x,y;
+
+			if(std::getline(args,command,' ')){
+				ID1 = command;
+				if( this->buildingLayout.find(command) == this->buildingLayout.end() ) return 3;
+			}else return 1;
+
+			if(std::getline(args,command,' ')){
+				x = std::atoi(command.c_str())-1;
+				if( x<0 ) return 2;
+			}else return 1;
+
+			if(std::getline(args,command,' ')){
+				y = std::atoi(command.c_str())-1;
+				if( y<0 ) return 2;
+			}else return 1;
+
+			ignite(ID1,x,y);
+			return 0;
+		}else if(command=="deflagrate"){
+			std::string ID1;
+			int x,y,r;
+				if(std::getline(args,command,' ')){
+				ID1 = command;
+					if( this->buildingLayout.find(command) == this->buildingLayout.end() ) return 3;
+				}else return 1;
+
+				if(std::getline(args,command,' ')){
+					x = std::atoi(command.c_str())-1;
+					if( x<0 ) return 2;
+				}else return 1;
+
+				if(std::getline(args,command,' ')){
+					y = std::atoi(command.c_str())-1;
+					if( y<0 ) return 2;
+				}else return 1;
+
+				if(std::getline(args,command,' ')){
+					r = std::atoi(command.c_str());
+					if( r<1 ) return 2;
+				}else r=1;
+
+				deflagrate(ID1,x,y,r);
+				return 0;
+		}else if(command=="block"){
+			std::string ID1;
+			int x,y;
+
+			if(std::getline(args,command,' ')){
+				ID1 = command;
+				if( this->buildingLayout.find(command) == this->buildingLayout.end() ) return 3;
+			}else return 1;
+
+			if(std::getline(args,command,' ')){
+				x = std::atoi(command.c_str())-1;
+				if( x<0 ) return 2;
+			}else return 1;
+
+			if(std::getline(args,command,' ')){
+				y = std::atoi(command.c_str())-1;
+				if( y<0 ) return 2;
+			}else return 1;
+
+			block(ID1,x,y);
+			return 0;
+		}else if(command=="unblock"){
+			std::string ID1;
+			int x,y;
+
+			if(std::getline(args,command,' ')){
+				ID1 = command;
+				if( this->buildingLayout.find(command) == this->buildingLayout.end() ) return 3;
+			}else return 1;
+
+			if(std::getline(args,command,' ')){
+				x = std::atoi(command.c_str())-1;
+				if( x<0 ) return 2;
+			}else return 1;
+
+			if(std::getline(args,command,' ')){
+				y = std::atoi(command.c_str())-1;
+				if( y<0 ) return 2;
+			}else return 1;
+
+			unblock(ID1,x,y);
 			return 0;
 		}
 
