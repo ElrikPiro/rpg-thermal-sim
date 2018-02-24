@@ -417,6 +417,7 @@ class building{
 	}
 
 	void loop(){
+		refresh(ref);
 		int h = 0;
 		while(h!=-1){
 			h=command();
