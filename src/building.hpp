@@ -15,9 +15,10 @@
 #include <iostream>
 #include <istream>
 #include <sstream>
+#include <fstream>
 #include "room.hpp"
 
-const char CLEAR[] = {0x1b,'[','2','J'};
+const char CLEAR[] = {0x1b,'[','2','J','\0'};
 
 typedef std::map<std::string, room*> layout;
 
@@ -29,7 +30,7 @@ class building{
 
 	public:
 	building(){
-		puts("EMPTY BUILDING CREATED.");
+
 	}
 
 	building(std::map<std::string, room*> rooms){
@@ -39,6 +40,29 @@ class building{
 
 	building(std::string file){
 		//TODO: files will be opened and appended with every single command
+		if(file.length()==0) return;
+		std::ifstream readfile;
+		readfile.open(file);
+		int iterations = 1;
+		if(readfile.fail()){
+			std::cout << "FILE: NOT FOUND.\n";
+			exit(-1);
+		}
+		std::string line,nil;
+		bool failed = false;
+		int ret;
+		while(std::getline(readfile,line)){
+			ret = _command(line);
+			if(ret!=0) {
+				std::cout << "Failed to interpret line: \n" << iterations << ": " << line << std::endl;
+				std::getline(std::cin,nil);
+				failed = true;
+			}
+			iterations++;
+		}
+
+		if(failed) exit(-1);
+		return;
 	}
 
 	//TODO: commands //FIXME: input problems must be prevented
@@ -160,13 +184,19 @@ class building{
 	}
 
 
+
+
 	int command(){
 		std::string input, command;
 		std::cout << "command> ";
 		std::getline(std::cin,input);
+		return _command(input);
+	}
+
+	int _command(std::string input){
+		std::string command;
 		std::istringstream args(input);
 		std::getline(args,command,' ');
-
 		if(command==""){iterate();refresh(ref);return 0;}
 
 		//TODO: the whole parsing
