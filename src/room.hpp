@@ -285,6 +285,16 @@ class room{
 
 	//getCellXY(int,int) to get and edit cell properties
 	cell* getCellXY(int x,int y){
+		if(x>=w || y>=h || x < 0 || y < 0) {
+			std::cout << "The cell you especified does not exist. please, introduce a valid combination:\nX: ";
+			std::string in;
+			std::getline(std::cin,in);
+			x = std::atoi(in.c_str())-1;
+			std::cout << "Y: ";
+			std::getline(std::cin,in);
+			y = std::atoi(in.c_str())-1;
+			return getCellXY(x,y);
+		}
 		return layout[w*y+x];
 	}
 
@@ -305,6 +315,14 @@ class room{
 			oss << std::endl;
 		}
 		return oss.str();
+	}
+
+	int getWidth(){
+		return w;
+	}
+
+	int getHeight(){
+		return h;
 	}
 
 };

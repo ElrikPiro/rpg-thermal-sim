@@ -52,6 +52,7 @@ class building{
 		bool failed = false;
 		int ret;
 		while(std::getline(readfile,line)){
+			if(line=="") line = "#";
 			ret = _command(line);
 			if(ret!=0) {
 				std::cout << "Failed to interpret line: \n" << iterations << ": " << line << std::endl;
@@ -200,7 +201,7 @@ class building{
 		std::istringstream args(input);
 		std::getline(args,command,' ');
 		if(command==""){iterate();refresh(ref);return 0;}
-
+		if(command.c_str()[0]=='#') return 0;
 		//TODO: the whole parsing
 		if(command=="refresh"){
 
