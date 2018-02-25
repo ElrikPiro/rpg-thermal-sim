@@ -168,10 +168,10 @@ class cell{
 	}
 
 	std::string toString(){
-		char RESET[] = {0x1b,'[','3','9',';','4','9','m'};
-		char FIRE[] = {0x1b,'[','4','1','m'};
-		char HEAT[] = {0x1b,'[','1','0','0','m'};
-		char INFLAMMABLE[] = {0x1b,'[','4','4','m'};
+		char RESET[] = {0x1b,'[','3','9',';','4','9','m','\0'};
+		char FIRE[] = {0x1b,'[','4','1','m','\0'};
+		char HEAT[] = {0x1b,'[','1','0','0','m','\0'};
+		char INFLAMMABLE[] = {0x1b,'[','4','4','m','\0'};
 
 		std::ostringstream oss;
 		oss << '[';
