@@ -172,7 +172,7 @@ class building{
 				"\n"
 				"\tlist -                                      shows all room names and descriptions\n"
 				"\n"
-				"\tignite -                                    sets a cell on fire\n"
+				"\tignite roomID x y -                         sets a cell on fire\n"
 				"\n"
 				"\tdeflagrate roomID x y [r] -                 set a cell and it's neightbours on fire, "
 				"if r is set higher than 1, it will do it recursively r times\n"
@@ -183,7 +183,13 @@ class building{
 				"\n"
 				"\tput roomID x y ignition -                   puts an inflamable object on the selected cell\n"
 				"\n"
-				"Note that blank spaces will act as a separator.\n"<<std::endl;
+				"Note that blank spaces will act as a separator.\n"
+				"GLOSSARY\n"
+				"\troomID -                                    Alphanumeric, no spaces, its the reference for a room\n"
+				"\tflame -                                     Integer, 1 or 0, defines if a cell is on fire\n"
+				"\tignition -                                  Integer, if positive, sets the ignition point of a cell, if negative, defines how many iterations until the fire on that cell unsets\n"
+				"\ttemperature -                               Temperature counters of the Cell, a fire generates 10 of them each iteration\n"
+				"\t"<<std::endl;
 	}
 
 
