@@ -25,8 +25,9 @@ typedef std::map<std::string, room*> layout;
 class building{
 	std::map<std::string, room*> buildingLayout;
 	layout ref;
-	std::list<std::string> links;
+	std::list<std::string> builds,puts,links;
 	int iteration = 0;
+	std::string file;
 
 	public:
 	building(){
@@ -39,7 +40,6 @@ class building{
 	}
 
 	building(std::string file){
-		//TODO: files will be opened and appended with every single command
 		if(file.length()==0) return;
 		std::ifstream readfile;
 		readfile.open(file);
@@ -63,10 +63,12 @@ class building{
 		}
 
 		if(failed) exit(-1);
+		readfile.close();
+		this->file = file;
 		return;
 	}
 
-	//TODO: commands //FIXME: input problems must be prevented
+	//commands
 	void refresh(layout buildingLayout){
 		std::cout << CLEAR;
 		std::cout << "Iteration: " << this->iteration << "\n";
@@ -155,8 +157,41 @@ class building{
 			cell* c = buildingLayout[ID]->getCellXY(x,y);
 			c->setReachable();
 	}
+
+	//TODO: editar los comandos build, [put, block, unblock, clear] y link para que añadan los comandos en las listas de modo que se pueda hacer save
+	//TODO: añadir save a la lista de comandos y al help
+	int save(std::string filename=""){
+		std::ofstream writefile;
+		if(filename=="") filename = file;
+		writefile.open(filename,std::ofstream::trunc | std::ofstream::out);
+		if(writefile.is_open()){
+			//for de builds
+			for(auto it = builds.begin();it!=builds.end();it++){
+				std::string iterator = *it;
+				writefile << iterator << std::endl;
+			}
+			//for de puts
+			for(auto it = puts.begin();it!=puts.end();it++){
+				std::string iterator = *it;
+				writefile << iterator << std::endl;
+			}
+			//for de links
+			for(auto it = links.begin();it!=links.end();it++){
+				std::string iterator = *it;
+				writefile << iterator << std::endl;
+			}
+			writefile.close();
+			return 0;
+		}else{
+			return 5;
+		}
+	}
+
+	//TODO: comando load: carga un fichero
+	//TODO: comando reset: recarga el estado inicial del programa, si se ha hecho save, carga el estado del save
+	//TODO: comando clear: deja una celda por defecto, afecta al save
 	//help: list all commands
-	void help(){//TODO: make it prettier
+	void help(){
 		std::cout <<
 				"\trefresh [roomID [roomID [(...)}]] -         cleans the screen and shows all created rooms, "
 				"if a list of room IDs is provided, it will only show those rooms.\n"
@@ -189,7 +224,10 @@ class building{
 				"\tflame -                                     Integer, 1 or 0, defines if a cell is on fire\n"
 				"\tignition -                                  Integer, if positive, sets the ignition point of a cell, if negative, defines how many iterations until the fire on that cell unsets\n"
 				"\ttemperature -                               Temperature counters of the Cell, a fire generates 10 of them each iteration\n"
-				"\t"<<std::endl;
+				"\n"
+				"OTHER INFO\n"
+				"\trooms -                                     Rooms are shown as a 2D array of cells, the first cell (1,1) is the one at the bottom left\n"
+				<<std::endl;
 	}
 
 
@@ -208,7 +246,6 @@ class building{
 		std::getline(args,command,' ');
 		if(command==""){iterate();refresh(ref);return 0;}
 		if(command.c_str()[0]=='#') return 0;
-		//TODO: the whole parsing
 		if(command=="refresh"){
 
 			ref.clear();
@@ -238,7 +275,7 @@ class building{
 
 			if(std::getline(args,command,' ')){
 				w = std::atoi(command.c_str());
-				if( w<1 ) return 2;//FIXME: ojo! those input must be checked in order ti avoid referencing outbounds
+				if( w<1 ) return 2;
 			}else return 1;
 
 			if(std::getline(args,command,' ')){
@@ -462,6 +499,7 @@ class building{
 			if(h==2) std::cerr << "wrong input" << std::endl;
 			if(h==3) std::cerr << "object already exist" << std::endl;
 			if(h==4) std::cerr << "room does not exist" << std::endl;
+			if(h==5) std::cerr << "file could not be opened" << std::endl;
 		}
 	}
 
