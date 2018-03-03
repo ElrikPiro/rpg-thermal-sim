@@ -308,7 +308,7 @@ class room{
 	std::string toString(){
 		std::ostringstream oss;
 		oss << this->desc << std::endl;
-		for(int ih = 0;ih<this->h;ih++){
+		for(int ih = this->h-1;ih>=0;ih--){
 			for(int jw = 0;jw<this->w;jw++){
 				oss << this->layout[ih*this->w+jw]->toString();
 			}
