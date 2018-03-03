@@ -152,7 +152,7 @@ class building{
 			c->setReachable();
 	}
 
-	//TODO: editar los comandos build, [put, block, unblock, clear] y link para que añadan los comandos en las listas de modo que se pueda hacer save
+	//TODO: editar los comandos  clear para que añadan los comandos en las listas de modo que se pueda hacer save
 	//TODO: añadir save a la lista de comandos y al help
 	int save(std::string filename=""){
 		std::ofstream writefile;
@@ -283,6 +283,7 @@ class building{
 
 			newRoom(ID,w,h,desc);
 			ref[ID] = this->buildingLayout[ID];
+			builds.push_back(input);
 			return 0;
 		}else if(command=="set"){
 			std::string ID;
@@ -357,6 +358,7 @@ class building{
 			}else return 1;
 
 			linkCells(ID1,w1,h1,ID2,w2,h2);
+			links.push_back(input);
 			return 0;
 		}else if(command=="list"){
 			for(auto it = this->buildingLayout.begin();it!=this->buildingLayout.end();it++){
@@ -429,6 +431,7 @@ class building{
 			}else return 1;
 
 			block(ID1,x,y);
+			puts.push_back(input);
 			return 0;
 		}else if(command=="unblock"){
 			std::string ID1;
@@ -450,6 +453,7 @@ class building{
 			}else return 1;
 
 			unblock(ID1,x,y);
+			puts.push_back(input);
 			return 0;
 		}else if(command=="put"){
 			std::string ID1;
@@ -476,6 +480,7 @@ class building{
 			}else return 1;
 
 			setCell(ID1,x,y,0,ignition,0);
+			puts.push_back(input);
 			return 0;
 		}
 
