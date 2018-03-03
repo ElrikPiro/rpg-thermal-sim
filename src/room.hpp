@@ -167,6 +167,27 @@ class cell{
 		destination->addNeightbour(this);
 	}
 
+	void ignite(){
+		cell* c = this;
+
+		if(c->getIgnition() > 0){
+			c->setStatus(1,c->getIgnition()*-10,c->getTemp());
+		}else if(c->getFlame()==1){
+			c->setStatus(1,c->getIgnition()-1,c->getTemp());
+		}else{
+			c->setStatus(1,-2,c->getTemp());
+		}
+	}
+
+	void deflagrate(int r){
+		std::list<cell*> nhood = this->neightbours;
+		for(auto it = nhood.begin();it!=nhood.end();it++){
+			cell* iterator = *it;
+			if(iterator->isSpreadable()) iterator->ignite();
+			if(iterator->isSpreadable() && r>1) iterator->deflagrate(r-1);
+		}
+	}
+
 	std::string toString(){
 		char RESET[] = {0x1b,'[','3','9',';','4','9','m','\0'};
 		char FIRE[] = {0x1b,'[','4','1','m','\0'};

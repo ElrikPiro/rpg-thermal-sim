@@ -122,14 +122,8 @@ class building{
 		_ignite(c);
 	}
 
-	void _ignite(cell* c){//FIXME: crap like this should be moved to the cell class
-		if(c->getIgnition() > 0){
-			c->setStatus(1,c->getIgnition()*-10,c->getTemp());
-		}else if(c->getFlame()==1){
-			c->setStatus(1,c->getIgnition()-1,c->getTemp());
-		}else{
-			c->setStatus(1,-2,c->getTemp());
-		}
+	void _ignite(cell* c){
+		c->ignite();
 	}
 
 	//deflagrate(int): ignites a cell and its neightbours on n levels
@@ -139,7 +133,7 @@ class building{
 		_deflagrate(c,r);
 	}
 
-	void _deflagrate(cell* c,int r=1){//FIXME: crap like this should be moved to the cell class
+	void _deflagrate(cell* c,int r=1){
 		std::list<cell*> nhood = c->getNeightbourhood();
 		for(auto it = nhood.begin();it!=nhood.end();it++){
 			cell* iterator = *it;
