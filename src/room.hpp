@@ -292,6 +292,10 @@ class room{
 
 	}
 
+	~room(){
+		for(int i = 0;i<w*h;i++) delete layout[i];
+	}
+
 	void iterate(int n=1){
 		while(n--){
 			for(int i = 0;i<w*h;i++) layout[i]->spread();
