@@ -129,7 +129,7 @@ class cell{
 	}
 
 	void checkFlashpoint(){
-		if((this->temp_counters > this->ignition) && (this->ignition > 0)) {
+		if((this->temp_counters > this->ignition*100) && (this->ignition > 0)) {
 			this->flame = 1;
 			this->ignition *= -10;
 		}
@@ -137,7 +137,7 @@ class cell{
 			if(++this->ignition==0) this->flame = 0;
 		}
 
-		if(this->flame==1) this->temp_counters += 10;
+		if(this->flame==1) this->temp_counters += 500;
 	}
 
 	void dissipateHeat(){
@@ -200,11 +200,15 @@ class cell{
 			oss << FIRE << " * ";
 		else if(!this->spreadable)
 			oss << "###";
-		else if(this->temp_counters>0){//until 1000 it works properly, I assume we'll never reach ten hundred degrees.
+		else if(this->temp_counters>20){//until 1000 it works properly, I assume we'll never reach ten hundred degrees.
 			oss << HEAT;
-			if(this->temp_counters < 10) oss << " " << this->temp_counters << " ";
+			if(this->temp_counters < 50) oss << "   ";
 			else if(this->temp_counters < 100) oss << " " << this->temp_counters;
-			else oss << this->temp_counters;
+			else if(this->temp_counters < 1000) oss << this->temp_counters;
+			else if(this->temp_counters < 10000) oss << " " << this->temp_counters/1000 << "k";
+			else if(this->temp_counters < 100000) oss << this->temp_counters/1000 << "k";
+			else if(this->temp_counters < 1000000) oss << "." << this->temp_counters/100000 << "M";
+			else oss << "***";
 		}else if(this->ignition>0){
 			oss << INFLAMMABLE;
 			if(this->ignition < 10) oss << " " << this->ignition << " ";
