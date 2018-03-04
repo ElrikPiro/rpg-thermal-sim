@@ -152,8 +152,6 @@ class building{
 			c->setReachable();
 	}
 
-	//TODO: editar los comandos  clear para que añadan los comandos en las listas de modo que se pueda hacer save
-	//TODO: añadir save a la lista de comandos y al help
 	int save(std::string filename=""){
 		std::ofstream writefile;
 		if(filename=="") filename = file;
@@ -175,15 +173,55 @@ class building{
 				writefile << iterator << std::endl;
 			}
 			writefile.close();
+			file = filename;
 			return 0;
 		}else{
 			return 5;
 		}
 	}
 
-	//TODO: comando load: carga un fichero
-	//TODO: comando reset: recarga el estado inicial del programa, si se ha hecho save, carga el estado del save
-	//TODO: comando clear: deja una celda por defecto, afecta al save
+	void reset(){
+		for(auto it = buildingLayout.begin();it!=buildingLayout.end();it++){
+			std::pair<std::string,room*> iterator = *it;
+			delete iterator.second;
+		}
+		buildingLayout.clear();
+		ref.clear();
+		builds.clear();
+		puts.clear();
+		links.clear();
+		iteration = 0;
+	}
+	int load(std::string file=""){
+		if(file.length()==0) file = this->file;
+		std::ifstream readfile;
+		readfile.open(file);
+		int iterations = 1;
+		if(readfile.fail()){
+			std::cout << "FILE: NOT FOUND.\n";
+			return 5;
+		}
+		std::string line,nil;
+		bool failed = false;
+		int ret;
+		reset();
+		while(std::getline(readfile,line)){
+			if(line=="") line = "#";
+			ret = _command(line);
+			if(ret!=0) {
+				std::cout << "Failed to interpret line: \n" << iterations << ": " << line << std::endl;
+				std::getline(std::cin,nil);
+				failed = true;
+			}
+			iterations++;
+		}
+
+		if(failed) return 5;
+		readfile.close();
+		this->file = file;
+		return 0;
+	}
+
 	//help: list all commands
 	void help(){
 		std::cout <<
@@ -195,7 +233,7 @@ class building{
 				"\tbuild roomID w h [description] -            builds a new empty room\n"
 				"\n"
 				"\tset roomID x y flame ignition temperature - sets a new status to the selected "
-				"cell \n"
+				"cell, do not use it on a file you are going to save.\n"
 				"\n"
 				"\tlink roomID x y roomID x y -                link two cells, intended to connect cells between rooms\n"
 				"\n"
@@ -212,12 +250,20 @@ class building{
 				"\n"
 				"\tput roomID x y ignition -                   puts an inflamable object on the selected cell\n"
 				"\n"
+				"\tclear roomID x y -                          resets a cell to the default empty state\n"
+				"\n"
+				"\tsave [filename] -                           Saves the layout on the specified file, if no file is specified, it will save it on the last file loaded or saved\n"
+				"\n"
+				"\tload [filename] -                           Loads the building layout from the specified file, if no file is specified loads it from the last file red or saved\n"
+				"\n"
+				"\treset -                                     Deletes all rooms and resets the iteration counter\n"
 				"Note that blank spaces will act as a separator.\n"
 				"GLOSSARY\n"
 				"\troomID -                                    Alphanumeric, no spaces, its the reference for a room\n"
 				"\tflame -                                     Integer, 1 or 0, defines if a cell is on fire\n"
 				"\tignition -                                  Integer, if positive, sets the ignition point of a cell, if negative, defines how many iterations until the fire on that cell unsets\n"
 				"\ttemperature -                               Temperature counters of the Cell, a fire generates 10 of them each iteration\n"
+				"\tfilename -                                  The name of the target file to load or save the building data\n"
 				"\n"
 				"OTHER INFO\n"
 				"\trooms -                                     Rooms are shown as a 2D array of cells, the first cell (1,1) is the one at the bottom left\n"
@@ -481,6 +527,41 @@ class building{
 
 			setCell(ID1,x,y,0,ignition,0);
 			puts.push_back(input);
+			return 0;
+		}else if(command=="clear"){
+			std::string ID1;
+			int x,y;
+
+			if(std::getline(args,command,' ')){
+				ID1 = command;
+				if( this->buildingLayout.find(command) == this->buildingLayout.end() ) return 3;
+			}else return 1;
+
+			if(std::getline(args,command,' ')){
+				x = std::atoi(command.c_str())-1;
+				if( x<0 ) return 2;
+			}else return 1;
+
+			if(std::getline(args,command,' ')){
+				y = std::atoi(command.c_str())-1;
+				if( y<0 ) return 2;
+			}else return 1;
+
+			setCell(ID1,x,y,0,0,0);
+			puts.push_back(input);
+			return 0;
+		}else if(command=="save"){
+			std::string filename;
+			if(std::getline(args,command,' ')){
+				return save(command);
+			}else return save();
+		}else if(command=="load"){
+			std::string filename;
+			if(std::getline(args,command,' ')){
+				return load(command);
+			}else return load();
+		}else if(command=="reset"){
+			reset();
 			return 0;
 		}
 
