@@ -83,7 +83,7 @@ class cell{
 
 	//Actions
 
-	void spread(){
+	/*void _spread(){
 			int colder = 0;
 			int accumulate = temp_counters;
 			//int avg = 0;
@@ -120,7 +120,24 @@ class cell{
 				_it.first+=1;
 				stop.push_front(std::pair<int,cell*>(_it.first,_it.second));
 			}
-		}
+		}*/
+
+	void spread(){
+				if(!isSpreadable()) return;
+				int accumulate = temp_counters;
+				int avg = 0;
+				int flanders = 1;
+				for(auto it = this->neightbours.begin();it!=this->neightbours.end();it++){
+					cell* iterator = *it;
+					if(iterator->isSpreadable()) {
+						accumulate += iterator->temp_counters;
+						flanders++;
+					}
+				}
+
+				avg = accumulate/flanders;
+				addCounters(avg-temp_counters);
+			}
 
 	void commitStatus(){
 			if(aux_counters==0 && this->temp_counters>0) aux_counters--;
@@ -137,7 +154,7 @@ class cell{
 			if(++this->ignition==0) this->flame = 0;
 		}
 
-		if(this->flame==1) this->temp_counters += 500;
+		if(this->flame==1) this->temp_counters += 750;
 	}
 
 	void dissipateHeat(){
