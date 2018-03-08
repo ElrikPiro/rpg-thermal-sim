@@ -54,6 +54,8 @@ command>
 ```
 The command build takes the first word as the name that identifies the room we've just created, the second is the width, the third the height, after that comes, optionally, a description.
 
+Each cell of the room will be identified by the name of the room and it's coordinates, being the coordinates of the first cell (bottom left) `roomA 1 1` and the last cell (top right) `roomA 5 5`.
+
 Now, figure we want this room to have a neighbouring room, let's say, like this:
 ```
 [   ][   ][   ][   ][   ]
@@ -89,6 +91,17 @@ command>
 ```
 Note that we didn't specified a description for roomB so it defaults to `Room without description`
 
-Now this, by itself does not represent the scheme I'd drawn before, we must __link__ the cells together, but that's something i'll show you on the next README.md update
+Now this, by itself does not represent the scheme I'd drawn before, we must __link__ the cells together. In our rooms, each cell is represented by the brackets and it's contents, being `[   ]` an empty cell (there's nothing but air), cells can be shown in different colors and values that show information about it's state.
+
+The most important state is the Temperature, in order to a cell to be able to calculate it's temperature, it needs to know it's neightbourging cells temperature. Every cell on a new room knows it's neighbouring cells, but if we want cells from different rooms to take into account each other, we'll need to specify it by ourselves, that's what the __link__ command does.
+
+Let's connect the `doorAB 1 1` cell with the `roomA 5 3` and the `roomB 1 2` cells so we can achieve our objective with the next commands:
+```
+link doorAB 1 1 roomA 5 3
+link doorAB 1 1 roomB 1 2
+```
+Now, our rooms are connected, even if the output does not differ from the last output.
+
+Now It's time to ***put*** some ~~inflamable~~ forniture to decorate our pretty rooms...
 
 ![TO BE CONTINUED](https://i.kinja-img.com/gawker-media/image/upload/flgsb6ayx7n8wpk4cg2u.png)
