@@ -102,6 +102,41 @@ link doorAB 1 1 roomB 1 2
 ```
 Now, our rooms are connected, even if the output does not differ from the last output.
 
-Now It's time to ***put*** some ~~inflamable~~ forniture to decorate our pretty rooms...
+Now It's time to **put** some ~~inflamable~~ forniture to decorate our pretty rooms, that's what the **put** command does, let's say we want to model a door that is made of wood so it ignites between 200ºC and 300ºC this door is, of course, located on the cell `doorAB 1 1` and the temperature of ignition will be 200ºC.
+
+The command, simple as it is will be the next:
+```
+put doorAB 1 1 2
+```
+meaning the last `2` that the ignition temperature is 200 (200/100).
+
+The output now is the next:
+```
+Iteration: 0
+CODE: <doorAB>
+Door that connects roomA and roomB
+[ 2 ]
+CODE: <roomA>
+The first room that we are modeling
+[   ][   ][   ][   ][   ]
+[   ][   ][   ][   ][   ]
+[   ][   ][   ][   ][   ]
+[   ][   ][   ][   ][   ]
+[   ][   ][   ][   ][   ]
+CODE: <roomB>
+Room without description
+[   ][   ][   ][   ]
+[   ][   ][   ][   ]
+[   ][   ][   ][   ]
+command> 
+```
+The `[ 2 ]` shown in blue means _"this cell has an inflamable object that will ignite at 200ºC"_
+
+by now, let's **save** this map, using the next command:
+```
+save tutorial.txt
+```
+
+On the next release of this README tutorial, we will **load** this file to continue working on it.
 
 ![TO BE CONTINUED](https://i.kinja-img.com/gawker-media/image/upload/flgsb6ayx7n8wpk4cg2u.png)
