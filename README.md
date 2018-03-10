@@ -136,7 +136,77 @@ by now, let's **save** this map, using the next command:
 ```
 save tutorial.txt
 ```
+After using this command you'll be able to use the command **load** in order to reload your last saved map.
+```
+load tutorial.txt
+```
 
-On the next release of this README tutorial, we will **load** this file to continue working on it.
+### Playing with Fire
+Now, let's start burning things, with the debugging command **set** we are going to start a fire on the `roomB 4 2` cell.
+`set roomB 4 2 1 -20 0`
+after sending the command our output will look like this:
+```
+Iteration: 0
+CODE: <doorAB>
+Door that connects roomA and roomB
+[ 2 ]
+CODE: <roomA>
+The first room that we are modeling
+[   ][   ][   ][   ][   ]
+[   ][   ][   ][   ][   ]
+[   ][   ][   ][   ][   ]
+[   ][   ][   ][   ][   ]
+[   ][   ][   ][   ][   ]
+CODE: <roomB>
+Room without description
+[   ][   ][   ][   ]
+[   ][   ][   ][ * ]
+[   ][   ][   ][   ]
+command>
+```
+The asterisk (colored in red), means that theré's fire on that cell, now let's just press enter without any command and observe how things are evolving. 
+
+During the first 20 iterarions we could see of the grey cells were expanding, those grey cells had a number on it on most cases, that number is, of course, their temperature. We also could see how this temperature almost reached the ignition point of the door and how being this door on a different room it could get temperature, thanks to the **link** commands we used before.
+
+After the 20th iteration, the fire unsets and until the 49th iteration, temperature will dissipate until there's nothing our empty rooms.
+
+Finally I'm going to add some more inflammable material in order to show you a nice command to get a fire started and enjoy watching the world burn, first use the `load` command to reload the file, then, use the next commands:
+```
+put roomA 1 4 2
+put roomA 1 5 2
+put roomA 2 4 2
+put roomA 2 5 2
+put roomA 1 1 2
+put roomA 1 2 2
+put roomA 3 1 1
+put roomA 4 1 1
+put roomA 5 1 1
+save
+
+Iteration: 0
+CODE: <doorAB>
+Door that connects roomA and roomB
+[ 2 ]
+CODE: <roomA>
+The first room that we are modeling
+[ 2 ][ 2 ][   ][   ][   ]
+[ 2 ][ 2 ][   ][   ][   ]
+[   ][   ][   ][   ][   ]
+[ 2 ][   ][   ][   ][   ]
+[ 2 ][   ][ 1 ][ 1 ][ 1 ]
+CODE: <roomB>
+Room without description
+[   ][   ][   ][   ]
+[   ][   ][   ][   ]
+[   ][   ][   ][   ]
+command> 
+```
+with a bit of sythesis and imagination you can see a bed, a closet and a lot of paper on this bunch of blue numbers, whatever, just **ignite** the cell `roomA 1 5` and iterate to enjoy the spectacle.
+```
+ignite roomA 1 5
+```
+
+## Available commands
+TBA
 
 ![TO BE CONTINUED](https://i.kinja-img.com/gawker-media/image/upload/flgsb6ayx7n8wpk4cg2u.png)
