@@ -407,10 +407,8 @@ class building{
 			links.push_back(input);
 			return 0;
 		}else if(command=="list"){
-			for(auto it = this->buildingLayout.begin();it!=this->buildingLayout.end();it++){
 				listRooms();
-				return -2;
-			}
+				return 0;
 		}else if(command=="ignite"){
 			std::string ID1;
 			int x,y;
